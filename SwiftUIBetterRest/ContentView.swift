@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     
-    @State private var wakeUp = Date.now
+    @State private var wakeUp = wakeTime
     @State private var sleepAmount = 8.0
     @State private var coffeeAmount = 1
     
@@ -17,22 +17,49 @@ struct ContentView: View {
     @State private var alertMessage = ""
     @State private var showingAlert = false
     
+    static var wakeTime: Date {
+        var components = DateComponents()
+        components.hour = 7
+        components.minute = 0
+        return Calendar.current.date(from: components) ?? Date.now
+    }
+    
     
     var body: some View {
         NavigationView {
-            VStack {
-                Text("when do you want to wake up?")
-                    .font(.headline)
+            Form {
+                Section {
+                    DatePicker("please select a time", selection: $wakeUp, displayedComponents: .hourAndMinute)
+                } header: {
+                    Text("when do you want to wake up?")
+                       
+                }
                 
-                DatePicker("please select a time", selection: $wakeUp, displayedComponents: .hourAndMinute)
-                    .labelsHidden()
+                Section {
+                    Stepper("\(sleepAmount.formatted()) hours", value: $sleepAmount, in: 4...12, step: 0.25)
+                } header: {
+                    Text("desired sleep amont")
+                        
+                }
                 
-                Text("desired sleep amont")
-                    .font(.headline)
+                Section {
+                    Picker("Number of Cups", selection: $coffeeAmount) {
+                        ForEach(1..<12) {
+                            Text(String($0))
+                        }
+                    }
+                } header: {
+                    Text("Coffee Amount")
+                }
                 
-                Stepper("\(sleepAmount.formatted()) hours", value: $sleepAmount, in: 4...12, step: 0.25)
-                
-                Stepper(coffeeAmount == 1 ? "1 Cup" : "\(coffeeAmount) cups", value: $coffeeAmount, in: 1...20)
+                Section {
+                    Picker("more cups", selection: $coffeeAmount) {
+                        ForEach(1..<5) {
+                            Text(String($0))
+                        }
+                    }
+                }
+
             }.navigationTitle("Better Rest")
                 .toolbar {
                     Button("Calculate", action: calculateBedtime)
